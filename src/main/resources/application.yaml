@@ -1,0 +1,3 @@
+mapbox:
+  user: "<username>"
+  token: "<secret-token>"
