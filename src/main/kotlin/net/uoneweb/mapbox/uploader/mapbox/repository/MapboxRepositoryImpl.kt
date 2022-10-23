@@ -24,15 +24,6 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         ObjectMapper().registerModule(KotlinModule.Builder().build())
     }
 
-    override fun listStyles() {
-        val res = restTemplate.getForObject(
-            mapboxConfig.host + "/styles/v1/{username}?access_token={token}", String::class.java,
-            mapboxConfig.user,
-            mapboxConfig.token
-        )
-        logger.info { res.toString() }
-    }
-
     override fun listTilesetSources(): List<TilesetSource> {
         val res = restTemplate.getForEntity(
             mapboxConfig.host + "/tilesets/v1/sources/{username}?access_token={token}",

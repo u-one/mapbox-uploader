@@ -6,8 +6,6 @@ import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 
 interface MapboxRepository {
 
-    fun listStyles()
-
     fun listTilesetSources(): List<TilesetSource>
 
     fun getTilesetSource(tilesetSourceId: String): TilesetSource?
