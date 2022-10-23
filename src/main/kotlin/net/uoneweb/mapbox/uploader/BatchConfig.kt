@@ -14,8 +14,11 @@ import org.springframework.context.annotation.Configuration
 class BatchConfig(
     @Autowired val jobBuilderFactory: JobBuilderFactory,
     @Autowired val stepBuilderFactory: StepBuilderFactory,
-    @Autowired val mapboxRepository: MapboxRepository
-) {
+
+    ) {
+
+    @Autowired
+    private lateinit var mapboxRepository: MapboxRepository
 
     @Bean
     fun job(): Job {

@@ -34,6 +34,9 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.batch:spring-batch-test")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.34.0")
+
+    runtimeOnly("com.h2database:h2")
 }
 
 tasks.withType<KotlinCompile> {

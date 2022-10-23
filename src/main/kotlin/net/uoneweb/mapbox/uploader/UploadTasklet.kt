@@ -16,13 +16,13 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
     private val logger = KotlinLogging.logger { }
     override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus? {
         logger.info { "hello" }
-        mapboxRepository.listStyles()
+        //mapboxRepository.listStyles()
         val tilesetSources = mapboxRepository.listTilesetSources()
         val tilesets = mapboxRepository.listTileset()
 
         // limited to 32 characters.
         // allowed special characters are - and _.
-        val tilesetSourceId = "tilset-source-test-1"
+        val tilesetSourceId = "tileset-source-test-1"
         val tilesetId = "tileset-test-1"
         val tilesetName = "tileset-name-test-1"
 
@@ -33,7 +33,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         val tilesetSource = mapboxRepository.getTilesetSource(tilesetSourceId)
 
         if (tilesetSource != null) {
-            updateTilesetSource(tilesetSourceId) ?: return RepeatStatus.FINISHED
+            updateTilesetSource(tilesetSource) ?: return RepeatStatus.FINISHED
         } else {
             val newTilesetSource = createTilesetSource(tilesetSourceId) ?: return RepeatStatus.FINISHED
             // composed of your username followed by a period and the tileset's unique name
@@ -58,14 +58,14 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         return mapboxRepository.createTilesetSource(tilesetSourceId, geoJson)
     }
 
-    private fun updateTilesetSource(tilesetSourceId: String): TilesetSource? {
+    private fun updateTilesetSource(tilesetSource: TilesetSource): TilesetSource? {
         val body =
             "{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n" // line-delimited GeoJson
         val file = File("test.geojson")
         file.writeBytes(body.toByteArray())
         val geoJson = FileSystemResource(file)
 
-        return mapboxRepository.updateTilesetSource(tilesetSourceId, geoJson)
+        return mapboxRepository.updateTilesetSource(tilesetSource.getSimpleId(), geoJson)
     }
 
     private fun createRecipe(

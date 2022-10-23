@@ -1,3 +1,4 @@
 mapbox:
   user: "<username>"
   token: "<secret-token>"
+  host: "<mapbox-api-host>"
