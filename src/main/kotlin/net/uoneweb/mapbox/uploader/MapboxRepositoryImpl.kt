@@ -3,6 +3,7 @@ package net.uoneweb.mapbox.uploader
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import mu.KotlinLogging
+import net.uoneweb.mapbox.uploader.mapbox.CreateTilesetSourceResponse
 import net.uoneweb.mapbox.uploader.mapbox.PublishResponse
 import net.uoneweb.mapbox.uploader.mapbox.Tileset
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
@@ -65,7 +66,7 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         }
     }
 
-    override fun createTilesetSource(tilesetSourceId: String, body: Any): TilesetSource? {
+    override fun createTilesetSource(tilesetSourceId: String, body: Any): TilesetSource {
         val multiParts = LinkedMultiValueMap<String, Any>()
         multiParts.add("file", body)
 
@@ -76,10 +77,14 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multiParts)
-        val res = restTemplate.exchange(request, TilesetSource::class.java)
-
+        val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
+       
         logger.info { res.body.toString() }
-        return res.body
+
+        res.body?.let {
+            return TilesetSource(it.id, it.files, it.fileSize, it.sourceSize.toString())
+        }
+        throw RuntimeException("createTilesetSource response is null")
     }
 
     override fun updateTilesetSource(tilesetSourceId: String, body: Any): TilesetSource? {
