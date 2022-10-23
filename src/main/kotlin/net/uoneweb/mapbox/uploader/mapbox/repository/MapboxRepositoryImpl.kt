@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 import java.util.stream.Collectors
+import kotlin.streams.toList
 
 @Repository
 class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val mapboxConfig: MapboxConfig) :
@@ -27,26 +28,30 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
     override fun listTilesetSources(): List<TilesetSource> {
         val res = restTemplate.getForEntity(
             mapboxConfig.host + "/tilesets/v1/sources/{username}?access_token={token}",
-            Array<TilesetSource>::class.java,
+            Array<TilesetSourceResponse>::class.java,
             mapboxConfig.user,
             mapboxConfig.token
         )
         logger.info {
-            Arrays.stream(res.body).map(TilesetSource::toString)
+            Arrays.stream(res.body).map(TilesetSourceResponse::toString)
                 .collect(Collectors.joining(","))
         }
-        return res.body?.toList() ?: listOf()
+        return res.body?.toList()?.stream()?.map {
+            TilesetSource(TilesetSourceId(it.id), it.files, it.size)
+        }?.toList() ?: listOf()
+
     }
 
-    override fun getTilesetSource(tilesetSourceId: String): TilesetSource? {
+    override fun getTilesetSource(tilesetSourceId: TilesetSourceId): TilesetSource? {
         try {
-            return restTemplate.getForObject(
+            val resp = restTemplate.getForObject(
                 mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
-                TilesetSource::class.java,
+                TilesetSourceResponse::class.java,
                 mapboxConfig.user,
-                tilesetSourceId,
+                tilesetSourceId.getSimpleId(),
                 mapboxConfig.token
-            )
+            ) ?: return null
+            return TilesetSource(TilesetSourceId(resp.id), resp.files, resp.size, resp.sizeNice)
         } catch (e: RestClientResponseException) {
             if (e.rawStatusCode == HttpStatus.NOT_FOUND.value()) {
                 return null
@@ -55,14 +60,14 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         }
     }
 
-    override fun createTilesetSource(tilesetSourceId: String, body: Any): TilesetSource {
+    override fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource {
         val multiParts = LinkedMultiValueMap<String, Any>()
         multiParts.add("file", body)
 
         val request = RequestEntity.post(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
             mapboxConfig.user,
-            tilesetSourceId,
+            tilesetSourceId.getSimpleId(),
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multiParts)
@@ -71,19 +76,19 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         logger.info { res.body.toString() }
 
         res.body?.let {
-            return TilesetSource(it.id, it.files, it.fileSize, it.sourceSize.toString())
+            return TilesetSource(TilesetSourceId(it.id), it.files, it.fileSize, it.sourceSize.toString())
         }
         throw RuntimeException("createTilesetSource response is null")
     }
 
-    override fun updateTilesetSource(tilesetSourceId: String, body: Any): TilesetSource? {
+    override fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource? {
         val multiParts = LinkedMultiValueMap<String, Any>()
         multiParts.add("file", body)
 
         val request = RequestEntity.put(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
             mapboxConfig.user,
-            tilesetSourceId,
+            tilesetSourceId.getSimpleId(),
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multiParts)
@@ -93,7 +98,7 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         return res.body
     }
 
-    override fun deleteTilesetSource(tilesetSourceId: String) {
+    override fun deleteTilesetSource(tilesetSourceId: TilesetSourceId) {
         val res = restTemplate.delete(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
             mapboxConfig.user,

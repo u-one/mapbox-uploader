@@ -6,10 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.Body
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import net.uoneweb.mapbox.uploader.MapboxConfig
-import net.uoneweb.mapbox.uploader.mapbox.Layer
-import net.uoneweb.mapbox.uploader.mapbox.Recipe
-import net.uoneweb.mapbox.uploader.mapbox.Tileset
-import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
+import net.uoneweb.mapbox.uploader.mapbox.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -163,10 +160,10 @@ class MapboxRepositoryImplTest {
         val file = File("test.geojson")
         file.writeBytes(body.toByteArray())
 
-        val tilesetSource = mapboxRepository.createTilesetSource("test-tileset-source-id", body)
+        val tilesetSource = mapboxRepository.createTilesetSource(TilesetSourceId("test-tileset-source-id"), body)
         assertThat(tilesetSource).isEqualTo(
             TilesetSource(
-                "mapbox://tileset-source/test-user/tileset-source-test-1",
+                TilesetSourceId("mapbox://tileset-source/test-user/tileset-source-test-1"),
                 1,
                 12345,
                 "12345"
@@ -190,10 +187,10 @@ class MapboxRepositoryImplTest {
                 )
         )
 
-        val tilesetSource = mapboxRepository.getTilesetSource("test-tileset-source-id")
+        val tilesetSource = mapboxRepository.getTilesetSource(TilesetSourceId("test-tileset-source-id"))
         assertThat(tilesetSource).isEqualTo(
             TilesetSource(
-                "mapbox://tileset-source/test-user/tileset-source-test-1",
+                TilesetSourceId("mapbox://tileset-source/test-user/tileset-source-test-1"),
                 1,
                 119,
                 "119B"
@@ -216,7 +213,7 @@ class MapboxRepositoryImplTest {
                 )
         )
 
-        val tilesetSource = mapboxRepository.getTilesetSource("test-tileset-source-id")
+        val tilesetSource = mapboxRepository.getTilesetSource(TilesetSourceId("test-tileset-source-id"))
         assertThat(tilesetSource).isNull()
     }
 
@@ -241,7 +238,7 @@ class MapboxRepositoryImplTest {
         assertThat(tileSetSrcs).containsAll(
             listOf(
                 TilesetSource(
-                    "mapbox://tileset-source/test-user/tileset-source-test-1",
+                    TilesetSourceId("mapbox://tileset-source/test-user/tileset-source-test-1"),
                     1,
                     123
                 )

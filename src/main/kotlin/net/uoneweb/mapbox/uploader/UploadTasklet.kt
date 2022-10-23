@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.mapbox.Layer
 import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
+import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
 import org.springframework.batch.core.StepContribution
 import org.springframework.batch.core.scope.context.ChunkContext
@@ -18,21 +19,19 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
 
     private val logger = KotlinLogging.logger { }
     override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus? {
-        logger.info { "hello" }
-        //mapboxRepository.listStyles()
+        logger.info { "start" }
         val tilesetSources = mapboxRepository.listTilesetSources()
         val tilesets = mapboxRepository.listTileset()
 
-        // limited to 32 characters.
-        // allowed special characters are - and _.
-        val tilesetSourceId = "tileset-source-test-1"
+
+        val tilesetSourceId = TilesetSourceId("tileset-source-test-1")
         val tilesetId = "tileset-test-1"
         val tilesetName = "tileset-name-test-1"
 
         return update(tilesetSourceId, tilesetId, tilesetName)
     }
 
-    private fun update(tilesetSourceId: String, tilesetId: String, tilesetName: String): RepeatStatus {
+    private fun update(tilesetSourceId: TilesetSourceId, tilesetId: String, tilesetName: String): RepeatStatus {
         val tilesetSource = mapboxRepository.getTilesetSource(tilesetSourceId)
 
         if (tilesetSource != null) {
@@ -51,7 +50,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         return RepeatStatus.FINISHED
     }
 
-    private fun createTilesetSource(tilesetSourceId: String): TilesetSource? {
+    private fun createTilesetSource(tilesetSourceId: TilesetSourceId): TilesetSource? {
         val body =
             "{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n" // line-delimited GeoJson
         val file = File("test.geojson")
@@ -68,7 +67,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         file.writeBytes(body.toByteArray())
         val geoJson = FileSystemResource(file)
 
-        return mapboxRepository.updateTilesetSource(tilesetSource.getSimpleId(), geoJson)
+        return mapboxRepository.updateTilesetSource(tilesetSource.id, geoJson)
     }
 
     private fun createRecipe(
@@ -78,7 +77,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         minZoom: Int,
         maxZoom: Int
     ): Recipe {
-        val layers = mapOf(Pair(layerName, Layer(tilesetSource.id, minZoom, maxZoom)))
+        val layers = mapOf(Pair(layerName, Layer(tilesetSource.id.getCanonicalId(), minZoom, maxZoom)))
         return Recipe(version, layers)
     }
 

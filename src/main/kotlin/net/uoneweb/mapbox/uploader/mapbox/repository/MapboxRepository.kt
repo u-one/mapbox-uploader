@@ -3,18 +3,19 @@ package net.uoneweb.mapbox.uploader.mapbox.repository
 import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.Tileset
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
+import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
 
 interface MapboxRepository {
 
     fun listTilesetSources(): List<TilesetSource>
 
-    fun getTilesetSource(tilesetSourceId: String): TilesetSource?
+    fun getTilesetSource(tilesetSourceId: TilesetSourceId): TilesetSource?
 
-    fun createTilesetSource(tilesetSourceId: String, body: Any): TilesetSource?
+    fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource?
 
-    fun updateTilesetSource(tilesetSourceId: String, body: Any): TilesetSource?
+    fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource?
 
-    fun deleteTilesetSource(tilesetSourceId: String)
+    fun deleteTilesetSource(tilesetSourceId: TilesetSourceId)
 
     fun createTileset(tilesetId: String, tilesetName: String, recipe: Recipe)
 
