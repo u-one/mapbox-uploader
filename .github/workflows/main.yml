@@ -31,6 +31,8 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build
+        env:
+          SDK_REGISTRY_TOKEN: ${{ secrets.SDK_REGISTRY_TOKEN }}
 
       - name: Test
         run: ./gradlew test
@@ -41,7 +43,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           JACOCO_SOURCE_PATH: "${{github.workspace}}/src/main/java"
-          SDK_REGISTRY_TOKEN: ${{ secrets.SDK_REGISTRY_TOKEN }}
+
         with:
           coverageCommand: ./gradlew test
           coverageLocations: ${{github.workspace}}/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
