@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.Body
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
+import net.uoneweb.mapbox.uploader.mapbox.Tileset
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -78,6 +79,54 @@ class MapboxRepositoryImplTest {
                 1, mapOf(
                     Pair("test-layer-1", Layer("mapbox://tileset-source/test-user/tileset-source-test-1", 0, 5))
                 )
+            )
+        )
+    }
+
+    @Test
+    fun listTileset_Success_ReturnsTilesetList() {
+        mockMapboxApi.stubFor(
+            get("/mapbox/tilesets/v1/test-user?access_token=test-token").willReturn(
+                okJson(
+                    "[" +
+                            "  {" +
+                            "    \"type\": \"vector\"," +
+                            "    \"id\": \"test-user.tileset-test-1\"," +
+                            "    \"name\": \"tileset-name-test-1\"," +
+                            "    \"center\": [" +
+                            "      139.7625732421875," +
+                            "      35.679609609368576," +
+                            "      5" +
+                            "    ]," +
+                            "    \"created\": \"2022-10-02T15:55:28.113Z\"," +
+                            "    \"modified\": \"2022-10-22T07:24:33.210Z\"," +
+                            "    \"visibility\": \"private\"," +
+                            "    \"description\": \"This is description.\"," +
+                            "    \"filesize\": 123," +
+                            "    \"status\": \"available\"," +
+                            "    \"tileset_precisions\": {" +
+                            "      \"free\": 0" +
+                            "    }," +
+                            "    \"created_by_client\": null" +
+                            "  }\n" +
+                            "]"
+                )
+            )
+        )
+        val tilesets = mapboxRepository.listTileset()
+        assertThat(tilesets).isNotEmpty()
+        assertThat(tilesets.get(0)).isEqualTo(
+            Tileset(
+                "vector",
+                arrayOf(139.7625732421875, 35.679609609368576, 5.0),
+                "2022-10-02T15:55:28.113Z",
+                "This is description.",
+                123,
+                "test-user.tileset-test-1",
+                "2022-10-22T07:24:33.210Z",
+                "tileset-name-test-1",
+                "private",
+                "available"
             )
         )
     }
