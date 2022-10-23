@@ -8,7 +8,7 @@ data class TilesetSource(
     val id: String,
     val files: Int,
     val size: Int,
-    @JsonProperty("size_nice") val sizeNice: String?
+    @JsonProperty("size_nice") val sizeNice: String? = null
 ) {
     fun getSimpleId(): String {
         val uri = URI(id)

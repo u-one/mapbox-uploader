@@ -113,20 +113,22 @@ class MapboxRepositoryImplTest {
                 )
             )
         )
-        val tilesets = mapboxRepository.listTileset()
-        assertThat(tilesets).isNotEmpty()
-        assertThat(tilesets.get(0)).isEqualTo(
-            Tileset(
-                "vector",
-                arrayOf(139.7625732421875, 35.679609609368576, 5.0),
-                "2022-10-02T15:55:28.113Z",
-                "This is description.",
-                123,
-                "test-user.tileset-test-1",
-                "2022-10-22T07:24:33.210Z",
-                "tileset-name-test-1",
-                "private",
-                "available"
+        val tileSets = mapboxRepository.listTileset()
+        assertThat(tileSets).isNotEmpty
+        assertThat(tileSets).containsAll(
+            listOf(
+                Tileset(
+                    "vector",
+                    arrayOf(139.7625732421875, 35.679609609368576, 5.0),
+                    "2022-10-02T15:55:28.113Z",
+                    "This is description.",
+                    123,
+                    "test-user.tileset-test-1",
+                    "2022-10-22T07:24:33.210Z",
+                    "tileset-name-test-1",
+                    "private",
+                    "available"
+                )
             )
         )
     }
@@ -213,5 +215,34 @@ class MapboxRepositoryImplTest {
 
         val tilesetSource = mapboxRepository.getTilesetSource("test-tileset-source-id")
         assertThat(tilesetSource).isNull()
+    }
+
+    @Test
+    fun listTilesetSource_Success_ReturnsTilesetSourceList() {
+        mockMapboxApi.stubFor(
+            get("/mapbox/tilesets/v1/sources/test-user?access_token=test-token").willReturn(
+                okJson(
+                    "[" +
+                            "  {" +
+                            "    \"id\": \"mapbox://tileset-source/test-user/tileset-source-test-1\"," +
+                            "    \"size\": 123," +
+                            "    \"files\": 1" +
+                            "  }" +
+                            "]"
+                )
+            )
+        )
+
+        val tileSetSrcs = mapboxRepository.listTilesetSources()
+        assertThat(tileSetSrcs).isNotEmpty
+        assertThat(tileSetSrcs).containsAll(
+            listOf(
+                TilesetSource(
+                    "mapbox://tileset-source/test-user/tileset-source-test-1",
+                    1,
+                    123
+                )
+            )
+        )
     }
 }
