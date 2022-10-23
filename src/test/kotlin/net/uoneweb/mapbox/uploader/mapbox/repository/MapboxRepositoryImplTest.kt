@@ -1,10 +1,13 @@
-package net.uoneweb.mapbox.uploader
+package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.Body
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
+import net.uoneweb.mapbox.uploader.MapboxConfig
+import net.uoneweb.mapbox.uploader.mapbox.Layer
+import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.Tileset
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 import org.assertj.core.api.Assertions.assertThat

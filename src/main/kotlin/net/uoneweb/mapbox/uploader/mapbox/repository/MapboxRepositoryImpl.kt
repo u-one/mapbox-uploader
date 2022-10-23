@@ -1,12 +1,10 @@
-package net.uoneweb.mapbox.uploader
+package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import mu.KotlinLogging
-import net.uoneweb.mapbox.uploader.mapbox.CreateTilesetSourceResponse
-import net.uoneweb.mapbox.uploader.mapbox.PublishResponse
-import net.uoneweb.mapbox.uploader.mapbox.Tileset
-import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
+import net.uoneweb.mapbox.uploader.MapboxConfig
+import net.uoneweb.mapbox.uploader.mapbox.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
@@ -78,7 +76,7 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multiParts)
         val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
-       
+
         logger.info { res.body.toString() }
 
         res.body?.let {

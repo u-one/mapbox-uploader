@@ -1,5 +1,6 @@
 package net.uoneweb.mapbox.uploader
 
+import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing

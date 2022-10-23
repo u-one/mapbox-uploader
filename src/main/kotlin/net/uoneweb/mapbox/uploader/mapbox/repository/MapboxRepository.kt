@@ -1,5 +1,6 @@
-package net.uoneweb.mapbox.uploader
+package net.uoneweb.mapbox.uploader.mapbox.repository
 
+import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.Tileset
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 

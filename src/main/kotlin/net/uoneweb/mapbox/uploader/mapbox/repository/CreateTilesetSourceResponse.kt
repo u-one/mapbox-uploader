@@ -1,4 +1,4 @@
-package net.uoneweb.mapbox.uploader.mapbox
+package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

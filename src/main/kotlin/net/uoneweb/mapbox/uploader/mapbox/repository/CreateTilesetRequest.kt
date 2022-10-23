@@ -1,6 +1,7 @@
-package net.uoneweb.mapbox.uploader
+package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import net.uoneweb.mapbox.uploader.mapbox.Recipe
 
 data class CreateTilesetRequest(
     @JsonProperty("recipe") val recipe: Recipe,

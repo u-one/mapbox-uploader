@@ -1,4 +1,4 @@
-package net.uoneweb.mapbox.uploader
+package net.uoneweb.mapbox.uploader.mapbox
 
 // Somehow jackson does not serialize Recipe when this is data class
 class Recipe(val version: Int, val layers: Map<String, Layer>)
