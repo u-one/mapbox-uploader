@@ -38,6 +38,51 @@ class MapboxRepositoryImplTest {
     }
 
     @Test
+    fun createTileset_Success_ReturnsTileset() {
+        mockMapboxApi.stubFor(
+            post("/mapbox/tilesets/v1/test-user.tileset-test-1?access_token=test-token")
+                .withHeader("Content-Type", containing("application/json"))
+                .withRequestBody(
+                    equalToJson(
+                        "{" +
+                                "  \"recipe\": {" +
+                                "    \"version\": 1," +
+                                "    \"layers\": {" +
+                                "      \"test-layer-1\": {" +
+                                "        \"source\": \"mapbox://tileset-source/test-user/tileset-source-test-1\"," +
+                                "        \"minzoom\": 0," +
+                                "        \"maxzoom\": 5" +
+                                "      }" +
+                                "    }" +
+                                "  }," +
+                                "  \"name\": \"tileset-name-test-1\"," +
+                                "  \"description\": \"\"," +
+                                "  \"attribution\": []" +
+                                "}"
+                    )
+                )
+                .willReturn(
+                    okJson(
+                        "{" +
+                                "\"message\": \"Successfully created empty tileset tileset-test-1. " +
+                                "Publish your tileset to begin processing your data into vector tiles.\"" +
+                                "}"
+                    )
+                )
+        )
+
+        mapboxRepository.createTileset(
+            "tileset-test-1",
+            "tileset-name-test-1",
+            Recipe(
+                1, mapOf(
+                    Pair("test-layer-1", Layer("mapbox://tileset-source/test-user/tileset-source-test-1", 0, 5))
+                )
+            )
+        )
+    }
+
+    @Test
     fun createTilesetSource_Success_ReturnsTilesetSource() {
         mockMapboxApi.stubFor(
             post("/mapbox/tilesets/v1/sources/test-user/test-tileset-source-id?access_token=test-token")
