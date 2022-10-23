@@ -61,19 +61,14 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
     }
 
     override fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource {
-        val file = File("file.geojson")
-        file.writeBytes(body.toByteArray())
-
-        val multiParts = LinkedMultiValueMap<String, Any>()
-        multiParts.add("file", FileSystemResource(file))
-
         val request = RequestEntity.post(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
             mapboxConfig.user,
             tilesetSourceId.getSimpleId(),
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(multiParts)
+            .body(createMultiPartFile(body))
+
         val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
 
         logger.info { res.body.toString() }
@@ -85,19 +80,14 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
     }
 
     override fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource? {
-        val file = File("file.geojson")
-        file.writeBytes(body.toByteArray())
-
-        val multiParts = LinkedMultiValueMap<String, Any>()
-        multiParts.add("file", FileSystemResource(file))
-
         val request = RequestEntity.put(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
             mapboxConfig.user,
             tilesetSourceId.getSimpleId(),
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(multiParts)
+            .body(createMultiPartFile(body))
+       
         val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
 
         logger.info { res.body.toString() }
@@ -106,6 +96,15 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
             return TilesetSource(TilesetSourceId(it.id), it.files, it.fileSize, it.sourceSize.toString())
         }
         throw RuntimeException("updateTilesetSource response is null")
+    }
+
+    private fun createMultiPartFile(text: String): LinkedMultiValueMap<String, Any> {
+        val file = File("file.geojson")
+        file.writeBytes(text.toByteArray())
+
+        val multiParts = LinkedMultiValueMap<String, Any>()
+        multiParts.add("file", FileSystemResource(file))
+        return multiParts
     }
 
     override fun deleteTilesetSource(tilesetSourceId: TilesetSourceId) {
