@@ -5,6 +5,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.Body
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
+import com.google.gson.JsonObject
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.Point
 import net.uoneweb.mapbox.uploader.MapboxConfig
 import net.uoneweb.mapbox.uploader.mapbox.*
 import org.assertj.core.api.Assertions.assertThat
@@ -12,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.web.client.RestTemplate
-import java.io.File
 
 class MapboxRepositoryImplTest {
 
@@ -68,7 +70,7 @@ class MapboxRepositoryImplTest {
                                 "\"message\": \"Successfully created empty tileset tileset-test-1. " +
                                 "Publish your tileset to begin processing your data into vector tiles.\"" +
                                 "}"
-                    )
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
                 )
         )
 
@@ -110,7 +112,7 @@ class MapboxRepositoryImplTest {
                             "    \"created_by_client\": null" +
                             "  }\n" +
                             "]"
-                )
+                ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
             )
         )
         val tileSets = mapboxRepository.listTileset()
@@ -140,8 +142,9 @@ class MapboxRepositoryImplTest {
                 .withMultipartRequestBody(
                     aMultipart()
                         .withName("file")
-                        .withHeader("Content-Type", containing("text/plain"))
-                        .withBody(equalToJson("{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n"))
+                        .withHeader("Content-Disposition", containing("filename=\"file.geojson\""))
+                        .withHeader("Content-Type", containing("application/octet-stream"))
+                        .withBody(equalToJson("{\"type\":\"Feature\",\"id\":\"1\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n"))
                 )
                 .willReturn(
                     okJson(
@@ -151,16 +154,56 @@ class MapboxRepositoryImplTest {
                                 "  \"id\": \"mapbox://tileset-source/test-user/tileset-source-test-1\",\n" +
                                 "  \"source_size\": 12345\n" +
                                 "}"
-                    )
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
                 )
         )
 
-        val body =
-            "{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n" // line-delimited GeoJson
-        val file = File("test.geojson")
-        file.writeBytes(body.toByteArray())
+        val properties = JsonObject()
+        properties.addProperty("name", "tokyo")
+        val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
 
-        val tilesetSource = mapboxRepository.createTilesetSource(TilesetSourceId("test-tileset-source-id"), body)
+        val tilesetSource =
+            mapboxRepository.createTilesetSource(TilesetSourceId("test-tileset-source-id"), feature.toJson())
+        assertThat(tilesetSource).isEqualTo(
+            TilesetSource(
+                TilesetSourceId("mapbox://tileset-source/test-user/tileset-source-test-1"),
+                1,
+                12345,
+                "12345"
+            )
+        )
+    }
+
+    @Test
+    fun updateTilesetSource_Success_ReturnsTilesetSource() {
+        mockMapboxApi.stubFor(
+            put("/mapbox/tilesets/v1/sources/test-user/tileset-source-test-1?access_token=test-token")
+                .withMultipartRequestBody(
+                    aMultipart()
+                        .withName("file")
+                        .withHeader("Content-Disposition", containing("filename=\"file.geojson\""))
+                        .withHeader("Content-Type", containing("application/octet-stream"))
+                        .withBody(equalToJson("{\"type\":\"Feature\",\"id\":\"1\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}"))
+                )
+                .willReturn(
+                    okJson(
+                        "{" +
+                                "  \"file_size\": 12345," +
+                                "  \"files\": 1," +
+                                "  \"id\": \"mapbox://tileset-source/test-user/tileset-source-test-1\"," +
+                                "  \"source_size\": 12345" +
+                                "}"
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
+                )
+        )
+
+        val properties = JsonObject()
+        properties.addProperty("name", "tokyo")
+        val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
+
+        val tilesetSource =
+            mapboxRepository.updateTilesetSource(TilesetSourceId("tileset-source-test-1"), feature.toJson())
+
         assertThat(tilesetSource).isEqualTo(
             TilesetSource(
                 TilesetSourceId("mapbox://tileset-source/test-user/tileset-source-test-1"),
@@ -183,7 +226,7 @@ class MapboxRepositoryImplTest {
                                 "  \"size\": 119,\n" +
                                 "  \"size_nice\": \"119B\"\n" +
                                 "}"
-                    )
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
                 )
         )
 
@@ -209,7 +252,7 @@ class MapboxRepositoryImplTest {
                                     "  \"message\": \"mapbox://tileset-source/backflip/tileset-source-test-1 does not exist.\"\n" +
                                     "}"
                         )
-                    )
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
                 )
         )
 
@@ -229,7 +272,7 @@ class MapboxRepositoryImplTest {
                             "    \"files\": 1" +
                             "  }" +
                             "]"
-                )
+                ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
             )
         )
 

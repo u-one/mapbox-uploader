@@ -1,5 +1,8 @@
 package net.uoneweb.mapbox.uploader
 
+import com.google.gson.JsonObject
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.Point
 import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.mapbox.Layer
 import net.uoneweb.mapbox.uploader.mapbox.Recipe
@@ -10,9 +13,7 @@ import org.springframework.batch.core.StepContribution
 import org.springframework.batch.core.scope.context.ChunkContext
 import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.repeat.RepeatStatus
-import org.springframework.core.io.FileSystemResource
 import org.springframework.stereotype.Component
-import java.io.File
 
 @Component
 class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
@@ -51,23 +52,19 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
     }
 
     private fun createTilesetSource(tilesetSourceId: TilesetSourceId): TilesetSource? {
-        val body =
-            "{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n" // line-delimited GeoJson
-        val file = File("test.geojson")
-        file.writeBytes(body.toByteArray())
-        val geoJson = FileSystemResource(file)
+        val properties = JsonObject()
+        properties.addProperty("name", "tokyo")
+        val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
 
-        return mapboxRepository.createTilesetSource(tilesetSourceId, geoJson)
+        return mapboxRepository.createTilesetSource(tilesetSourceId, feature.toJson())
     }
 
     private fun updateTilesetSource(tilesetSource: TilesetSource): TilesetSource? {
-        val body =
-            "{\"type\":\"Feature\",\"id\":1,\"geometry\":{\"type\":\"Point\",\"coordinates\":[139.76293,35.67871]},\"properties\":{\"name\":\"tokyo\"}}\n" // line-delimited GeoJson
-        val file = File("test.geojson")
-        file.writeBytes(body.toByteArray())
-        val geoJson = FileSystemResource(file)
+        val properties = JsonObject()
+        properties.addProperty("name", "tokyo")
+        val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
 
-        return mapboxRepository.updateTilesetSource(tilesetSource.id, geoJson)
+        return mapboxRepository.updateTilesetSource(tilesetSource.id, feature.toJson())
     }
 
     private fun createRecipe(

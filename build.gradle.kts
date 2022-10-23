@@ -19,6 +19,21 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+        authentication {
+            create<BasicAuthentication>("basic")
+        }
+        credentials {
+            username = "mapbox"
+            password =
+                if (project.hasProperty("SDK_REGISTRY_TOKEN")) {
+                    project.property("SDK_REGISTRY_TOKEN") as? String
+                } else {
+                    System.getenv("SDK_REGISTRY_TOKEN")
+                }
+        }
+    }
 }
 
 dependencies {
@@ -29,6 +44,7 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.mapbox.mapboxsdk:mapbox-sdk-geojson:6.8.0")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")

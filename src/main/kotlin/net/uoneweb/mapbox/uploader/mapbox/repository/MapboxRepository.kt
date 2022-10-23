@@ -11,9 +11,9 @@ interface MapboxRepository {
 
     fun getTilesetSource(tilesetSourceId: TilesetSourceId): TilesetSource?
 
-    fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource?
+    fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource?
 
-    fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource?
+    fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource?
 
     fun deleteTilesetSource(tilesetSourceId: TilesetSourceId)
 

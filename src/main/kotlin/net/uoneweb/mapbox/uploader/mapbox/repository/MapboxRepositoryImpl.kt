@@ -5,13 +5,13 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.MapboxConfig
 import net.uoneweb.mapbox.uploader.mapbox.*
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
+import org.springframework.core.io.FileSystemResource
+import org.springframework.http.*
 import org.springframework.stereotype.Repository
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
+import java.io.File
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.streams.toList
@@ -60,9 +60,12 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         }
     }
 
-    override fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource {
+    override fun createTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource {
+        val file = File("file.geojson")
+        file.writeBytes(body.toByteArray())
+
         val multiParts = LinkedMultiValueMap<String, Any>()
-        multiParts.add("file", body)
+        multiParts.add("file", FileSystemResource(file))
 
         val request = RequestEntity.post(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
@@ -81,9 +84,12 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         throw RuntimeException("createTilesetSource response is null")
     }
 
-    override fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: Any): TilesetSource? {
+    override fun updateTilesetSource(tilesetSourceId: TilesetSourceId, body: String): TilesetSource? {
+        val file = File("file.geojson")
+        file.writeBytes(body.toByteArray())
+
         val multiParts = LinkedMultiValueMap<String, Any>()
-        multiParts.add("file", body)
+        multiParts.add("file", FileSystemResource(file))
 
         val request = RequestEntity.put(
             mapboxConfig.host + "/tilesets/v1/sources/{username}/{id}?access_token={token}",
@@ -92,10 +98,14 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multiParts)
-        val res = restTemplate.exchange(request, TilesetSource::class.java)
+        val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
 
         logger.info { res.body.toString() }
-        return res.body
+
+        res.body?.let {
+            return TilesetSource(TilesetSourceId(it.id), it.files, it.fileSize, it.sourceSize.toString())
+        }
+        throw RuntimeException("updateTilesetSource response is null")
     }
 
     override fun deleteTilesetSource(tilesetSourceId: TilesetSourceId) {
