@@ -9,6 +9,7 @@ import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
+import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxTilesetSourceRepository
 import org.springframework.batch.core.StepContribution
 import org.springframework.batch.core.scope.context.ChunkContext
 import org.springframework.batch.core.step.tasklet.Tasklet
@@ -16,12 +17,15 @@ import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.stereotype.Component
 
 @Component
-class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
+class UploadTasklet(
+    private val mapboxRepository: MapboxRepository,
+    private val mapboxTilesetSourceRepository: MapboxTilesetSourceRepository
+) : Tasklet {
 
     private val logger = KotlinLogging.logger { }
     override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus? {
         logger.info { "start" }
-        val tilesetSources = mapboxRepository.listTilesetSources()
+        val tilesetSources = mapboxTilesetSourceRepository.listTilesetSources()
         val tilesets = mapboxRepository.listTileset()
 
 
@@ -33,7 +37,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
     }
 
     private fun update(tilesetSourceId: TilesetSourceId, tilesetId: String, tilesetName: String): RepeatStatus {
-        val tilesetSource = mapboxRepository.getTilesetSource(tilesetSourceId)
+        val tilesetSource = mapboxTilesetSourceRepository.getTilesetSource(tilesetSourceId)
 
         if (tilesetSource != null) {
             updateTilesetSource(tilesetSource) ?: return RepeatStatus.FINISHED
@@ -56,7 +60,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         properties.addProperty("name", "tokyo")
         val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
 
-        return mapboxRepository.createTilesetSource(tilesetSourceId, feature.toJson())
+        return mapboxTilesetSourceRepository.createTilesetSource(tilesetSourceId, feature.toJson())
     }
 
     private fun updateTilesetSource(tilesetSource: TilesetSource): TilesetSource? {
@@ -64,7 +68,7 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         properties.addProperty("name", "tokyo")
         val feature = Feature.fromGeometry(Point.fromLngLat(139.76293, 35.67871), properties, "1")
 
-        return mapboxRepository.updateTilesetSource(tilesetSource.id, feature.toJson())
+        return mapboxTilesetSourceRepository.updateTilesetSource(tilesetSource.id, feature.toJson())
     }
 
     private fun createRecipe(
@@ -74,7 +78,9 @@ class UploadTasklet(private val mapboxRepository: MapboxRepository) : Tasklet {
         minZoom: Int,
         maxZoom: Int
     ): Recipe {
-        val layers = mapOf(Pair(layerName, Layer(tilesetSource.id.getCanonicalId(), minZoom, maxZoom)))
+        val layers = mapOf(
+            Pair(layerName, Layer(tilesetSource.id.getCanonicalId(), minZoom, maxZoom)),
+        )
         return Recipe(version, layers)
     }
 

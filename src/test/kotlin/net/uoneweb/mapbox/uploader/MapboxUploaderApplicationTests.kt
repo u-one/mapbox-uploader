@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.http.Body
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepositoryImpl
+import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxTilesetSourceRepositoryImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,7 +23,7 @@ import org.springframework.test.context.TestPropertySource
 
 @SpringBatchTest
 @EnableAutoConfiguration
-@ContextConfiguration(classes = [AppConfig::class, BatchConfig::class, MapboxRepositoryImpl::class])
+@ContextConfiguration(classes = [AppConfig::class, BatchConfig::class, MapboxRepositoryImpl::class, MapboxTilesetSourceRepositoryImpl::class])
 @EnableConfigurationProperties(MapboxConfig::class)
 @TestPropertySource(properties = ["mapbox.user = test-user", "mapbox.token: test-token", "mapbox.host: http://localhost:8080/mapbox"])
 class MapboxUploaderApplicationTests {
