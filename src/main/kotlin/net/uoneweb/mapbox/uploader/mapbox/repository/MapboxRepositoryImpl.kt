@@ -6,8 +6,10 @@ import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.MapboxConfig
 import net.uoneweb.mapbox.uploader.mapbox.*
 import org.springframework.http.*
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Repository
 import org.springframework.web.client.RestTemplate
+import java.security.InvalidParameterException
 import java.util.*
 import java.util.stream.Collectors
 
@@ -18,6 +20,17 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
 
     init {
         ObjectMapper().registerModule(KotlinModule.Builder().build())
+    }
+
+    init {
+        logger.info { "restTemplate's  RequestFactory: " + restTemplate.requestFactory.javaClass.name }
+        if (restTemplate.requestFactory is SimpleClientHttpRequestFactory) {
+            throw InvalidParameterException(
+                "Default SimpleClientHttpRequestFactory does not support PATCH method. " +
+                        "Use another factory supports PATCH method. " +
+                        "ex. HttpComponentsClientHttpRequestFactory "
+            )
+        }
     }
 
     override fun createTileset(tilesetId: String, tilesetName: String, recipe: Recipe) {

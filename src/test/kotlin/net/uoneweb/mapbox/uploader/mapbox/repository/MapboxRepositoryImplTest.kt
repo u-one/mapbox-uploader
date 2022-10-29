@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 
 class MapboxRepositoryImplTest {
@@ -30,6 +31,8 @@ class MapboxRepositoryImplTest {
     @BeforeEach
     fun setUp() {
         val restTemplate = RestTemplate()
+        restTemplate.requestFactory = HttpComponentsClientHttpRequestFactory()
+
         val mapboxConfig = MapboxConfig().apply {
             host = "http://localhost:8080/mapbox"
             user = "test-user"
