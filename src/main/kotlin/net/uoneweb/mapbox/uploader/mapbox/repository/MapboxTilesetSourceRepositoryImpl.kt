@@ -2,6 +2,7 @@ package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.MapboxConfig
+import net.uoneweb.mapbox.uploader.mapbox.MapboxTilesetSourceRepository
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
 import org.springframework.core.io.FileSystemResource
@@ -20,7 +21,7 @@ class MapboxTilesetSourceRepositoryImpl(
     private val restTemplate: RestTemplate,
     private val mapboxConfig: MapboxConfig
 ) : MapboxTilesetSourceRepository {
-   
+
     private val logger = KotlinLogging.logger { }
 
     override fun listTilesetSources(): List<TilesetSource> {

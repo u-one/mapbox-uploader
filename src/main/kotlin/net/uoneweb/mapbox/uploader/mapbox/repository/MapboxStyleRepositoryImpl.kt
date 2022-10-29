@@ -2,6 +2,7 @@ package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.MapboxConfig
+import net.uoneweb.mapbox.uploader.mapbox.MapboxStyleRepository
 import org.springframework.web.client.RestTemplate
 
 class MapboxStyleRepositoryImpl(private val restTemplate: RestTemplate, private val mapboxConfig: MapboxConfig) :

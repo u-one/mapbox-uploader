@@ -2,13 +2,14 @@ package net.uoneweb.mapbox.uploader.mapbox.repository
 
 import mu.KotlinLogging
 import net.uoneweb.mapbox.uploader.MapboxConfig
+import net.uoneweb.mapbox.uploader.mapbox.MapboxJobRepository
 import org.springframework.web.client.RestTemplate
 
 class MapboxJobRepositoryImpl(private val restTemplate: RestTemplate, private val mapboxConfig: MapboxConfig) :
     MapboxJobRepository {
 
     private val logger = KotlinLogging.logger { }
-   
+  
     override fun listJobs(tilesetId: String) {
         val res = restTemplate.getForObject<String>(
             mapboxConfig.host + "/tilesets/v1/{tileset}/jobs?access_token={token}", String::class.java,

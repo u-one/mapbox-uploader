@@ -1,7 +1,4 @@
-package net.uoneweb.mapbox.uploader.mapbox.repository
-
-import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
-import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
+package net.uoneweb.mapbox.uploader.mapbox
 
 interface MapboxTilesetSourceRepository {
     fun listTilesetSources(): List<TilesetSource>

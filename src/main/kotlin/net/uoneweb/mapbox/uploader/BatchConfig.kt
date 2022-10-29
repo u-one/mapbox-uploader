@@ -1,8 +1,8 @@
 package net.uoneweb.mapbox.uploader
 
-import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxJobRepository
-import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
-import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxTilesetSourceRepository
+import net.uoneweb.mapbox.uploader.mapbox.MapboxJobRepository
+import net.uoneweb.mapbox.uploader.mapbox.MapboxRepository
+import net.uoneweb.mapbox.uploader.mapbox.MapboxTilesetSourceRepository
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing

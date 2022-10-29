@@ -1,4 +1,4 @@
-package net.uoneweb.mapbox.uploader.mapbox.repository
+package net.uoneweb.mapbox.uploader.mapbox
 
 interface MapboxStyleRepository {
 

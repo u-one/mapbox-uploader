@@ -1,7 +1,4 @@
-package net.uoneweb.mapbox.uploader.mapbox.repository
-
-import net.uoneweb.mapbox.uploader.mapbox.Recipe
-import net.uoneweb.mapbox.uploader.mapbox.Tileset
+package net.uoneweb.mapbox.uploader.mapbox
 
 interface MapboxRepository {
     fun createTileset(tilesetId: String, tilesetName: String, recipe: Recipe)
