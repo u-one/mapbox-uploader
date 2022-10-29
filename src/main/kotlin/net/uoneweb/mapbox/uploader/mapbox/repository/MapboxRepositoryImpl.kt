@@ -7,6 +7,7 @@ import net.uoneweb.mapbox.uploader.MapboxConfig
 import net.uoneweb.mapbox.uploader.mapbox.*
 import org.springframework.core.io.FileSystemResource
 import org.springframework.http.*
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Repository
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClientResponseException
@@ -23,6 +24,9 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
 
     init {
         ObjectMapper().registerModule(KotlinModule.Builder().build())
+
+        val requestFactory = HttpComponentsClientHttpRequestFactory();
+        restTemplate.setRequestFactory(requestFactory)
     }
 
     override fun listTilesetSources(): List<TilesetSource> {
@@ -87,7 +91,7 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
             mapboxConfig.token
         ).contentType(MediaType.MULTIPART_FORM_DATA)
             .body(createMultiPartFile(body))
-       
+
         val res = restTemplate.exchange(request, CreateTilesetSourceResponse::class.java)
 
         logger.info { res.body.toString() }
@@ -130,6 +134,23 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         logger.info {
             val objectMapper = ObjectMapper()
             objectMapper.writeValueAsString(createTilesetRequest)
+        }
+        val res = restTemplate.exchange(request, Void::class.java)
+
+        logger.info { res.body.toString() }
+    }
+
+    override fun updateTilesetRecipe(tilesetId: String, recipe: Recipe) {
+        val request = RequestEntity.patch(
+            mapboxConfig.host + "/tilesets/v1/{tileset}/recipe?access_token={token}",
+            String.format("%s.%s", mapboxConfig.user, tilesetId),
+            mapboxConfig.token
+        ).contentType(MediaType.APPLICATION_JSON)
+            .body(recipe)
+
+        logger.info {
+            val objectMapper = ObjectMapper()
+            objectMapper.writeValueAsString(recipe)
         }
         val res = restTemplate.exchange(request, Void::class.java)
 

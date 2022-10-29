@@ -86,6 +86,45 @@ class MapboxRepositoryImplTest {
     }
 
     @Test
+    fun updateTilesetRecipe_Success() {
+        mockMapboxApi.stubFor(
+            patch(WireMock.urlPathEqualTo("/mapbox/tilesets/v1/test-user.tileset-test-1/recipe"))
+                .withQueryParam("access_token", equalTo("test-token"))
+                .withHeader("Content-Type", containing("application/json"))
+                .withRequestBody(
+                    equalToJson(
+                        "{" +
+                                "  \"version\": 1," +
+                                "  \"layers\": {" +
+                                "    \"test-layer-1\": {" +
+                                "      \"source\": \"mapbox://tileset-source/test-user/tileset-source-test-1\"," +
+                                "      \"minzoom\": 0," +
+                                "      \"maxzoom\": 5" +
+                                "    }" +
+                                "  }" +
+                                "}"
+                    )
+                )
+                .willReturn(
+                    okJson(
+                        "{" +
+                                "\"message\": \"Successfully updated recipe. " +
+                                "}"
+                    ).withHeader("Connection", "close") // to avoid i/o error sometimes occurs in test
+                )
+        )
+
+        mapboxRepository.updateTilesetRecipe(
+            "tileset-test-1",
+            Recipe(
+                1, mapOf(
+                    Pair("test-layer-1", Layer("mapbox://tileset-source/test-user/tileset-source-test-1", 0, 5))
+                )
+            )
+        )
+    }
+
+    @Test
     fun listTileset_Success_ReturnsTilesetList() {
         mockMapboxApi.stubFor(
             get("/mapbox/tilesets/v1/test-user?access_token=test-token").willReturn(
