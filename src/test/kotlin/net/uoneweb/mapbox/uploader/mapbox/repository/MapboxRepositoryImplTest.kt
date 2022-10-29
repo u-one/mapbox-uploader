@@ -23,7 +23,7 @@ class MapboxRepositoryImplTest {
     val mockMapboxApi: WireMockExtension = WireMockExtension.newInstance()
         .options(
             WireMockConfiguration.wireMockConfig()
-                .port(8080)
+                .dynamicPort()
         )
         .failOnUnmatchedRequests(false)
         .build()
@@ -33,8 +33,10 @@ class MapboxRepositoryImplTest {
         val restTemplate = RestTemplate()
         restTemplate.requestFactory = HttpComponentsClientHttpRequestFactory()
 
+        val mockInfo = mockMapboxApi.runtimeInfo
+
         val mapboxConfig = MapboxConfig().apply {
-            host = "http://localhost:8080/mapbox"
+            host = String.format("http://localhost:%d/mapbox", mockInfo.httpPort)
             user = "test-user"
             token = "test-token"
         }

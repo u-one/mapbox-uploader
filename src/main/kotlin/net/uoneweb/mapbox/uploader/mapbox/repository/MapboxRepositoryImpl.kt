@@ -101,22 +101,5 @@ class MapboxRepositoryImpl(private val restTemplate: RestTemplate, private val m
         return res.body?.jobId ?: ""
     }
 
-    override fun listJobs(tilesetId: String) {
-        val res = restTemplate.getForObject<String>(
-            mapboxConfig.host + "/tilesets/v1/{tileset}/jobs?access_token={token}", String::class.java,
-            String.format("%s.%s", mapboxConfig.user, tilesetId),
-            mapboxConfig.token
-        )
-        logger.info { res.toString() }
-    }
 
-    override fun getJob(tilesetId: String, jobId: String) {
-        val res = restTemplate.getForObject<String>(
-            mapboxConfig.host + "/tilesets/v1/{tileset}/jobs/{job_id}?access_token={token}", String::class.java,
-            String.format("%s.%s", mapboxConfig.user, tilesetId),
-            jobId,
-            mapboxConfig.token
-        )
-        logger.info { res.toString() }
-    }
 }

@@ -8,6 +8,7 @@ import net.uoneweb.mapbox.uploader.mapbox.Layer
 import net.uoneweb.mapbox.uploader.mapbox.Recipe
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSource
 import net.uoneweb.mapbox.uploader.mapbox.TilesetSourceId
+import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxJobRepository
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxTilesetSourceRepository
 import org.springframework.batch.core.StepContribution
@@ -19,7 +20,8 @@ import org.springframework.stereotype.Component
 @Component
 class UploadTasklet(
     private val mapboxRepository: MapboxRepository,
-    private val mapboxTilesetSourceRepository: MapboxTilesetSourceRepository
+    private val mapboxTilesetSourceRepository: MapboxTilesetSourceRepository,
+    private val mapboxJobRepository: MapboxJobRepository
 ) : Tasklet {
 
     private val logger = KotlinLogging.logger { }
@@ -50,7 +52,7 @@ class UploadTasklet(
         }
 
         val jobId = mapboxRepository.publishTileset(tilesetId)
-        mapboxRepository.getJob(tilesetId, jobId)
+        mapboxJobRepository.getJob(tilesetId, jobId)
         //mapboxRepository.listJobs(tilesetId)
         return RepeatStatus.FINISHED
     }

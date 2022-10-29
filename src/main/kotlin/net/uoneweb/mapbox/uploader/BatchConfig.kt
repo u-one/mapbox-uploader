@@ -1,5 +1,6 @@
 package net.uoneweb.mapbox.uploader
 
+import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxJobRepository
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxRepository
 import net.uoneweb.mapbox.uploader.mapbox.repository.MapboxTilesetSourceRepository
 import org.springframework.batch.core.Job
@@ -25,6 +26,9 @@ class BatchConfig(
     @Autowired
     private lateinit var mapboxTilesetSourceRepository: MapboxTilesetSourceRepository
 
+    @Autowired
+    private lateinit var mapboxJobRepository: MapboxJobRepository
+
     @Bean
     fun job(): Job {
         return jobBuilderFactory
@@ -37,7 +41,7 @@ class BatchConfig(
     fun step(): Step {
         return stepBuilderFactory
             .get("step1")
-            .tasklet(UploadTasklet(mapboxRepository, mapboxTilesetSourceRepository))
+            .tasklet(UploadTasklet(mapboxRepository, mapboxTilesetSourceRepository, mapboxJobRepository))
             .build()
     }
 }
