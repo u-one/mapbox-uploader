@@ -56,6 +56,9 @@ dependencies {
     testImplementation("org.springframework.batch:spring-batch-test")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.34.0")
 
+    // testing architecture
+    testImplementation("com.tngtech.archunit:archunit:1.0.0")
+
     runtimeOnly("com.h2database:h2")
 }
 
